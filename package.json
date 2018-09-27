@@ -1,0 +1,39 @@
+{
+  "name": "nora-digdag",
+  "version": "1.0.0",
+  "main": "main.ts",
+  "scripts": {
+    "dev": "NODE_ENV=develop webpack --watch",
+    "lint": "eslint --ext .js,.ts,.tsx src/main src/test/unit webpack.config.js karma.conf.js",
+    "test": "karma start karma.conf.js",
+    "test-watch": "karma start karma.conf.js --no-single-run",
+    "build-dev": "NODE_ENV=develop webpack",
+    "build": "NODE_ENV=production webpack"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2",
+    "shell": "^0.5.0"
+  },
+  "devDependencies": {
+    "@types/jasmine": "^2.8.8",
+    "@types/node": "^10.9.4",
+    "@types/request-promise": "^4.1.42",
+    "clean-webpack-plugin": "^0.1.17",
+    "eslint": "^5.5.0",
+    "jasmine-core": "^3.2.1",
+    "karma": "^3.0.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-jasmine": "^1.1.2",
+    "karma-mocha-reporter": "^2.2.5",
+    "karma-webpack": "^3.0.2",
+    "ts-loader": "^5.0.0",
+    "typescript": "^3.0.3",
+    "typescript-eslint-parser": "^18.0.0",
+    "uglifyjs-webpack-plugin": "^1.1.6",
+    "webpack": "^4.17.2",
+    "webpack-cli": "^3.1.0",
+    "webpack-node-externals": "^1.7.2"
+  }
+}

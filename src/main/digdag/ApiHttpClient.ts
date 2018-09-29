@@ -32,4 +32,8 @@ export default class ApiHttpClient {
     return request("POST", endPoint, {body, "json": true}).then(parseBody);
   }
 
+  getRaw(endPoint: string, queryString: any = {}): rp.RequestPromise {
+    return request("GET", endPoint, {"qs": queryString, "encoding": null});
+  }
+
 }

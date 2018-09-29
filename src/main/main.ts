@@ -1,4 +1,5 @@
 import ApiHttpClient from "digdag/ApiHttpClient";
+import {gunzipSync} from "zlib";
 import * as shell from "shell";
 import * as pad from "pad";
 
@@ -220,6 +221,31 @@ async function main(args: string[]) {
       v.body.sessions
         .filter(({lastAttempt}) => lastAttempt.done && !lastAttempt.success)
         .forEach(x => console.log(JSON.stringify(x)));
+      res.prompt();
+    } catch (e) {
+      handleError(e, res);
+    }
+  });
+
+  app.cmd("failedLogs :attemptId", "preview error log", async (req, res) => {
+    try {
+      const logs = await client.get(`/logs/${req.params.attemptId}/files`, {"page_size": 300});
+      const tasks = await client.get(`/attempts/${req.params.attemptId}/tasks`);
+      const failedTaskNames = tasks.body.tasks.filter(({state}) => state === "error").map(({fullName}) => fullName);
+      const failedTaksLogFileNames = logs.body.files.filter(({taskName}) => failedTaskNames.includes(taskName)).map(({fileName}) => fileName);
+      const failedTaksLogFiles: any[] = await Promise.all(failedTaksLogFileNames.map(fileName => client.getRaw(`/logs/${req.params.attemptId}/files/${fileName}`, {})));
+      const errorRegex = /.*(fail|error|exception).*/i;
+      failedTaksLogFiles.forEach(log => {
+        gunzipSync(log.body).toString("utf-8").split("\n").forEach(line => {
+          if (line.match(errorRegex)) {
+            res.magenta();
+            console.log(line);
+            res.reset();
+          } else {
+            console.log(line);
+          }
+        });
+      });
       res.prompt();
     } catch (e) {
       handleError(e, res);

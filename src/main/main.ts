@@ -138,6 +138,47 @@ async function main(args: string[]) {
     }
   });
 
+  app.cmd("tasks :attemptId", "show tasks of attempt", async (req, res) => {
+    try {
+      const v = await client.get(`/attempts/${req.params.attemptId}/tasks`);
+      v.body.tasks.sort((a, b) => a.id - b.id);
+      const taskMap = v.body.tasks.reduce((a, b) => {
+        if (b.parentId === null) {
+          return a.set("root", [b]);
+        }
+        const subTasks = a.get(b.parentId) || [];
+        return a.set(b.parentId, [...subTasks, b]);
+      }, new Map());
+      const root = taskMap.get("root") || [];
+      const makeTree = function makeTree(task) {
+        const children = taskMap.get(task.id);
+        if (children) {
+          return Array.prototype.concat.apply([task], children.map(makeTree));
+        }
+        return [task];
+      };
+      const sorted = root.map(makeTree);
+      sorted[0].forEach(({id, fullName, state, startedAt}) => {
+        if (state === "error") {
+          res.red();
+        } else if (state === "group_error") {
+          res.magenta();
+        } else if (state === "success") {
+          res.green();
+        } else if (state === "blocked") {
+          res.nocolor();
+        } else {
+          res.cyan();
+        }
+        console.log(JSON.stringify({id, fullName, state, startedAt}));
+        res.reset();
+      });
+      res.prompt();
+    } catch (e) {
+      handleError(e, res);
+    }
+  });
+
   app.cmd("backfillDryRun :scheduleId :fromISODateTime :count", "dry run backfill sessions of schedule", async (req, res) => {
     try {
       const v = await client.post(`/schedules/${req.params.scheduleId}/backfill`, {

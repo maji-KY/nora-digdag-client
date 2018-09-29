@@ -213,6 +213,19 @@ async function main(args: string[]) {
     }
   });
 
+  app.cmd("failedSessions", "show failed sessions", async (req, res) => {
+    try {
+      const v = await client.get("/sessions", {"page_size": 300});
+      res.red();
+      v.body.sessions
+        .filter(({lastAttempt}) => lastAttempt.done && !lastAttempt.success)
+        .forEach(x => console.log(JSON.stringify(x)));
+      res.prompt();
+    } catch (e) {
+      handleError(e, res);
+    }
+  });
+
 }
 
 main(process.argv.slice(2));

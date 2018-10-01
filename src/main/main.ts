@@ -252,6 +252,36 @@ async function main(args: string[]) {
     }
   });
 
+  app.cmd("skipDryRun :scheduleId :fromISODateTime :count", "dry run skip sessions of schedule", async (req, res) => {
+    try {
+      const v = await client.post(`/schedules/${req.params.scheduleId}/skip`, {
+        "fromTime": req.params.fromISODateTime,
+        "count": req.params.count,
+        "dryRun": true
+      });
+      const {id, nextRunTime, nextScheduleTime, disabledAt} = v.body;
+      console.log(JSON.stringify({id, nextRunTime, nextScheduleTime, disabledAt}));
+      res.prompt();
+    } catch (e) {
+      handleError(e, res);
+    }
+  });
+
+  app.cmd("skip :scheduleId :fromISODateTime :count", "skip sessions of schedule", async (req, res) => {
+    try {
+      const v = await client.post(`/schedules/${req.params.scheduleId}/skip`, {
+        "fromTime": req.params.fromISODateTime,
+        "count": req.params.count,
+        "dryRun": false
+      });
+      const {id, nextRunTime, nextScheduleTime, disabledAt} = v.body;
+      console.log(JSON.stringify({id, nextRunTime, nextScheduleTime, disabledAt}));
+      res.prompt();
+    } catch (e) {
+      handleError(e, res);
+    }
+  });
+
 }
 
 main(process.argv.slice(2));

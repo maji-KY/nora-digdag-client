@@ -1,9 +1,9 @@
 import ApiHttpClient from "digdag/ApiHttpClient";
+import {readConfig} from "digdag/Config";
 import {gunzipSync} from "zlib";
-import * as shell from "shell";
+import commandLineArgs from "command-line-args";
+import shell from "shell";
 import * as pad from "pad";
-
-const client = new ApiHttpClient();
 
 function handleError(e: any, res: any) {
   res.red();
@@ -34,7 +34,17 @@ const help = function({"shell": shellInstance}) {
 
 async function main(args: string[]) {
 
-  const app = shell();
+  const optionDefinitions = [
+    { "name": "endpoint", "alias": "e", "type": String }
+  ];
+  const options = commandLineArgs(optionDefinitions);
+  const endpoint = options.endpoint ? options.endpoint : (await readConfig())["client.http.endpoint"];
+  const client = new ApiHttpClient(endpoint);
+
+  const app = shell({
+    "isShell": true
+  });
+
   // configure
   app.configure(() => {
     app.use(shell.completer({
@@ -254,4 +264,4 @@ async function main(args: string[]) {
 
 }
 
-main(process.argv.slice(2));
+main(process.argv.slice(2)).catch(e => console.error(e));

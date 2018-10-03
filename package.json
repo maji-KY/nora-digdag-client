@@ -36,5 +36,15 @@
     "webpack": "^4.17.2",
     "webpack-cli": "^3.1.0",
     "webpack-node-externals": "^1.7.2"
+  },
+  "resolutions": {
+    "combined-stream": "1.0.7",
+    "qs": "6.5.2",
+    "safe-buffer": "5.1.2",
+    "extsprintf": "1.3.0",
+    "depd": "1.1.2",
+    "setprototypeof": "1.1.0",
+    "statuses": "1.4.0",
+    "http-errors": "1.6.3"
   }
 }

@@ -131,6 +131,29 @@ async function main(args: string[]) {
     }
   });
 
+  app.cmd("sessions :projectId :workflowName :lastId", "show sessions of workflow with paging", async (req, res) => {
+    try {
+      const v = await client.get(`/projects/${req.params.projectId}/sessions`, {"workflow": req.params.workflowName, "last_id": req.params.lastId});
+      v.body.sessions.forEach(({id, sessionTime, lastAttempt}) => {
+        if (lastAttempt.done && !lastAttempt.success) {
+          res.red();
+        } else if (lastAttempt.done && lastAttempt.success) {
+          res.green();
+        }
+        const {"id": attemptId, retryAttemptName, done, success, createdAt, finishedAt} = lastAttempt;
+        console.log(JSON.stringify({
+          id,
+          sessionTime,
+          "lastAttempt": {"id": attemptId, retryAttemptName, done, success, createdAt, finishedAt}
+        }));
+        res.reset();
+      });
+      res.prompt();
+    } catch (e) {
+      handleError(e, res);
+    }
+  });
+
   app.cmd("attempts :sessionId", "show attempts of session", async (req, res) => {
     try {
       const v = await client.get(`/sessions/${req.params.sessionId}/attempts`, {"include_retried": true});

@@ -285,6 +285,69 @@ async function main(args: string[]) {
     }
   });
 
+  app.cmd("retry :attemptId", "retry session", async (req, res) => {
+    try {
+      const attemptResult = await client.get(`/attempts/${req.params.attemptId}`);
+      const {workflow, sessionTime, params} = attemptResult.body;
+
+      const v = await client.put("/attempts", {
+        "workflowId": workflow.id,
+        sessionTime,
+        params,
+        "retryAttemptName": new Date().getTime().toString(36)
+      });
+      console.log(JSON.stringify(v.body));
+      res.prompt();
+    } catch (e) {
+      handleError(e, res);
+    }
+  });
+
+  app.cmd("retry :attemptId :from", "retry session from specified task", async (req, res) => {
+    try {
+      const attemptResult = await client.get(`/attempts/${req.params.attemptId}`);
+      const {workflow, sessionTime, params} = attemptResult.body;
+
+      const v = await client.put("/attempts", {
+        "workflowId": workflow.id,
+        sessionTime,
+        params,
+        "resume": {
+          "mode": "from",
+          "attemptId": req.params.attemptId,
+          "from": req.params.from
+        },
+        "retryAttemptName": new Date().getTime().toString(36)
+      });
+      console.log(JSON.stringify(v.body));
+      res.prompt();
+    } catch (e) {
+      handleError(e, res);
+    }
+  });
+
+  app.cmd("resume :attemptId", "retry session from failed task", async (req, res) => {
+    try {
+      const attemptResult = await client.get(`/attempts/${req.params.attemptId}`);
+      const {workflow, sessionTime, params} = attemptResult.body;
+
+      const v = await client.put("/attempts", {
+        "workflowId": workflow.id,
+        sessionTime,
+        params,
+        "resume": {
+          "mode": "failed",
+          "attemptId": req.params.attemptId
+        },
+        "retryAttemptName": new Date().getTime().toString(36)
+      });
+      console.log(JSON.stringify(v.body));
+      res.prompt();
+    } catch (e) {
+      handleError(e, res);
+    }
+  });
+
   app.cmd("skipDryRun :scheduleId :fromISODateTime :count", "dry run skip sessions of schedule", async (req, res) => {
     try {
       const v = await client.post(`/schedules/${req.params.scheduleId}/skip`, {

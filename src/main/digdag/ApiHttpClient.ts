@@ -28,6 +28,10 @@ export default class ApiHttpClient {
     return request(this.baseUrl, "POST", endPoint, {body, "json": true}).then(parseBody);
   }
 
+  put(endPoint: string, body: any = {}): Promise<Response> {
+    return request(this.baseUrl, "PUT", endPoint, {body, "json": true}).then(parseBody);
+  }
+
   getRaw(endPoint: string, queryString: any = {}): rp.RequestPromise {
     return request(this.baseUrl, "GET", endPoint, {"qs": queryString, "encoding": null});
   }
